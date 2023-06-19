@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  username String @unique
+  password String
+
+  employee Employee?
+}
+
+model Employee {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firstName String
+  lastName  String
+  phone     String
+  email     String
+  status    String
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+
+  ownManagerDetails Manager? @relation("parentRecord")
+
+  managers EmployeeManager[]
+}
+
+model Manager {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownEmployeeDetails Employee @relation("parentRecord", fields: [employeeId], references: [id])
+  employeeId         Int      @unique
+
+  employees   EmployeeManager[]
+  departments Department[]
+}
+
+model EmployeeManager {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId Int
+
+  manager   Manager @relation(fields: [managerId], references: [id])
+  managerId Int
+}
+
+model Department {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name   String
+  status String
+
+  manager   Manager @relation(fields: [managerId], references: [id])
+  managerId Int
+}
